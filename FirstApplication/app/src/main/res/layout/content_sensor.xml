@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".SensorActivity"
+    tools:showIn="@layout/activity_sensor">
+
+    <TextView
+        android:id="@+id/xText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="X"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.272"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.156"
+        app:layout_constraintVertical_chainStyle="spread_inside" />
+
+    <TextView
+        android:id="@+id/yText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Y"
+        app:layout_constraintBottom_toTopOf="@+id/zText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.272"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/xText" />
+
+    <TextView
+        android:id="@+id/zText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Z"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.271"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/yText" />
+
+    <TextView
+        android:id="@+id/pitchText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="pitch"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.708"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.142" />
+
+    <TextView
+        android:id="@+id/rollText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="roll"
+        app:layout_constraintBottom_toTopOf="@+id/azimText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.549"
+        app:layout_constraintStart_toEndOf="@+id/yText"
+        app:layout_constraintTop_toBottomOf="@+id/pitchText"
+        app:layout_constraintVertical_bias="0.497" />
+
+    <TextView
+        android:id="@+id/azimText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="azimuth"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.54"
+        app:layout_constraintStart_toEndOf="@+id/zText"
+        app:layout_constraintTop_toBottomOf="@+id/rollText" />
+
+    <TextView
+        android:id="@+id/xGravText"
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:text="Grorce x"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.233"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.294" />
+
+    <TextView
+        android:id="@+id/xRotationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate_R x"
+        app:layout_constraintBottom_toTopOf="@+id/rollText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.512"
+        app:layout_constraintStart_toEndOf="@+id/xGravText"
+        app:layout_constraintTop_toBottomOf="@+id/pitchText"
+        app:layout_constraintVertical_bias="0.467" />
+
+    <TextView
+        android:id="@+id/yGravText"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:text="Gforce y"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.236"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.603" />
+
+    <TextView
+        android:id="@+id/yRotationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate_R y"
+        app:layout_constraintBottom_toTopOf="@+id/azimText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toEndOf="@+id/yGravText"
+        app:layout_constraintTop_toBottomOf="@+id/rollText"
+        app:layout_constraintVertical_bias="0.476" />
+
+    <TextView
+        android:id="@+id/zGravText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gforce z"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.236"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.871" />
+
+    <TextView
+        android:id="@+id/zRotationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate_R z"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toEndOf="@+id/zGravText"
+        app:layout_constraintTop_toBottomOf="@+id/azimText"
+        app:layout_constraintVertical_bias="0.405" />
+
+</android.support.constraint.ConstraintLayout>
