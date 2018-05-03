@@ -1,0 +1,32 @@
+bazel run --config=opt //tensorflow/contrib/lite/toco:toco -- \
+--input_file=keras_frozen.pb \
+--output_file= exerlite.tflite\
+--input_format=TENSORFLOW_GRAPHDEF \
+--output_format=TFLITE \
+—-allow_custom_ops\
+--inference_type=FLOAT \
+--input_shape=-1,40,12 \
+--input_array=import/accelerations_input \
+--output_array=scores/Softmax
+
+
+
+bazel run   /$(pwd)/toco:toco -- \
+  --input_file=$(pwd)/keras_frozen.pb \
+  --output_file=$(pwd)/keras_lite.tflite \
+  --input_format=TENSORFLOW_GRAPHDEF \
+  --output_format=TFLITE \
+  --inference_type=FLOAT \
+  --input_shape=-1,40,12 \
+  --input_array=import/accelerations_input \
+  --output_array=scores/Softmax 
+
+toco \
+  --input_file=keras_frozen.pb \
+  --output_file=exerlite.lite \
+  —-allow_custom_ops\
+  --input_format=TENSORFLOW_GRAPHDEF \
+  --output_format=TFLITE \
+  —-input_shape=-1,40,12\
+  --input_array=accelerations_input\
+  --output_array=scores/Softmax
