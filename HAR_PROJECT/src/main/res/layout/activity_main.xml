@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="22dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:context="io.github.aqibsaeed.activityrecognition.MainActivity"
+    android:background="#ededed">
+
+    <TableRow
+        android:id="@+id/title_row"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="22dp"
+        android:textAlignment="center">
+
+        <TextView
+            android:id="@+id/activitytext"
+            android:layout_weight="1"
+            android:text="@string/activity"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold|italic" />
+
+        <TextView
+            android:id="@+id/setbreakprob"
+            android:layout_weight="1"
+            android:text="@string/probability"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold|italic" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/downstairs_row"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="22dp">
+
+        <TextView
+            android:id="@+id/breaktext"
+            android:layout_weight="1"
+            android:text="Break"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/breakprob"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/jogging_row"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="22dp">
+
+        <TextView
+            android:id="@+id/situptext"
+            android:layout_weight="1"
+            android:text="Situp"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/situpprob"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/sitting_row"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="22dp">
+
+        <TextView
+            android:id="@+id/burpeetext"
+            android:layout_weight="1"
+            android:text="Burpee"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/burpeeprob"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/standing_row"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="22dp">
+
+        <TextView
+            android:id="@+id/squattext"
+            android:layout_weight="1"
+            android:text="Squat"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/squatprob"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+    </TableRow>
+
+</TableLayout>
