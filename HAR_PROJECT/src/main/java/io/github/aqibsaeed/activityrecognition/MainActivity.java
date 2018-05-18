@@ -87,7 +87,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
 
         input_signal = new ArrayList();
+        input_signal.clear();
         input_signal = csvReader();
+
         xGrav = new ArrayList();
         yGrav = new ArrayList();
         zGrav = new ArrayList();
@@ -136,12 +138,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 // TEST MODEL
+        input_collection.clear();
 
-
+        System.out.println(input_signal.size());
         activityInference = new ActivityInference(getApplicationContext());
-
+        activityPrediction();
 
     }
+
+   private  void writeText() {
+       BufferedWriter writer = null;
+       try {
+
+           File logFile = new File("result_data.csv");
+           System.out.println("Il file si trova :"+ logFile.getCanonicalPath());
+
+           writer = new BufferedWriter(new FileWriter(logFile));
+           for(int k=0;k<input_collection.size();k++) {
+               writer.write(input_collection.get(k));
+               writer.write("\n");
+           }
+
+
+       } catch (Exception e) {
+           e.printStackTrace();
+       } finally {
+           try {
+
+               writer.close();
+           } catch (Exception e) {
+           }
+       }
+   }
+
+
+
+
+
+
 
    private List csvReader(){
        BufferedReader reader;
@@ -152,14 +186,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
            reader = new BufferedReader(new InputStreamReader(file));
            String line = reader.readLine();
            int i=0;
-           while(i<600){
+           while (i<1296000) {
 
-               line = reader.readLine();
-               csvArray.add(line);
 
-               System.out.println("Csv Array size");
-               System.out.println(csvArray.size());
-               i++;
+                   line = reader.readLine();
+                   csvArray.add(line);
+
+
+                   //System.out.println("Csv Array size");
+                   //System.out.println(csvArray.size());
+
+                   i++;
+
            }
        } catch(IOException ioe){
            ioe.printStackTrace();
@@ -204,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
 
 
-        activityPrediction();
+            //activityPrediction();
         if ((event.sensor.getType() == Sensor.TYPE_GRAVITY) && (grav == true)) {
             // xG=event.values[0]/gConst;
             // yG=event.values[1]/gConst;
@@ -293,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void activityPrediction() {
-        if (input_signal.size() == 600) {
+        if (input_signal.size() == 1296000) {
             //if (xGrav.size() == N_SAMPLES && yGrav.size() == N_SAMPLES && zGrav.size() == N_SAMPLES && xAcc.size() == N_SAMPLES && yAcc.size() == N_SAMPLES && zAcc.size() == N_SAMPLES && pitch.size() == N_SAMPLES && roll.size() == N_SAMPLES && yaw.size() == N_SAMPLES && xRot.size() == N_SAMPLES && yRot.size() == N_SAMPLES && zRot.size() == N_SAMPLES) {
             // Mean normalize the signal
             //normalize();
@@ -317,51 +355,78 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             //   }
             // Perform inference using Tensorflow
             System.out.println("STR");
-            List<Float> prova = new ArrayList<>();
-            for(int j=0;j<input_signal.size();j++){
-                prova.add(j,Float.parseFloat(input_signal.get(j)));
-                System.out.println(prova.toString());
-            }
 
 
-            System.out.println(prova.size());
-            float[] results = activityInference.getActivityProb(toFloatArray(prova));
-            System.out.println(input_signal.size());
-            System.out.println("result");
-            System.out.println(results[0]);
-            System.out.println(results[1]);
-            System.out.println(results[2]);
-            System.out.println(results[3]);
-            System.out.println(results[4]);
+            int startSignal = 0;
+            int endSignal = 600;
+            int iterationNumber = 1;
+            System.out.println(startSignal);
+
+            while (endSignal < 1296000) {
+                int startProva = 0;
+                List<Float> prova = new ArrayList<>();
+                for (int j = 0; j < 600; j++) {
+                    prova.add(startProva, Float.parseFloat(input_signal.get(j+startSignal)));
+
+                   //System.out.println(prova.toString());
+
+                    startProva++;
+                }
+                startSignal = endSignal;
+                endSignal = endSignal + 600;
+
+                System.out.println(input_signal.size());
+                System.out.println(prova.size());
+                //float[] results = activityInference.getActivityProb(toFloatArray(prova));
+                float[] results = activityInference.getActivityProb(toFloatArray(prova));
+                System.out.println("Iterazione numero : "+iterationNumber);
+                System.out.println("result");
+                System.out.println(results[0]);
+                System.out.println(results[1]);
+                System.out.println(results[2]);
+                System.out.println(results[3]);
+                System.out.println(results[4]);
+                iterationNumber++;
 /*
             breakprob.setText(Float.toString(round(results[0], 2)));
             situpprob.setText(Float.toString(round(results[1], 2)));
             burpeeprob.setText(Float.toString(round(results[2], 2)));
             squatprob.setText(Float.toString(round(results[3], 2)));
             setbreakprob.setText(Float.toString(round(results[4], 2))); */
-            int max = 0;
-            for (int i = 0; i < 5; i++) {
-                if (results[i] > results[max]) {
-                    max = i;
+                int max = 0;
+                for (int i = 0; i < 4; i++) {
+                    if (results[i] > results[max]) {
+                        max = i;
+                    }
+
+                }
+                if (max == 0) {
+                    input_collection.add("Break");
+                    breakcount++;
+                    breakprob.setText(Integer.toString(breakcount));
+                }
+                if (max == 2) {
+                    input_collection.add("Situp");
+                    situpcount++;
+                    situpprob.setText(Integer.toString(situpcount));
+                }
+                if (max == 1) {
+                    input_collection.add("Burpee");
+                    burpeecount++;
+                    burpeeprob.setText(Integer.toString(burpeecount));
+                }
+                if (max == 3) {
+                    input_collection.add("Squat");
+                    squatcount++;
+                    squatprob.setText(Integer.toString(squatcount));
                 }
 
             }
-            if (max == 0) {
-                breakcount++;
-                breakprob.setText(Integer.toString(breakcount));
+            for (int k=0;k<input_collection.size();k++){
+                System.out.println(input_collection.get(k)+" è la previsione numero : "+ (k+1));
             }
-            if (max == 2) {
-                situpcount++;
-                situpprob.setText(Integer.toString(situpcount));
-            }
-            if (max == 1) {
-                burpeecount++;
-                burpeeprob.setText(Integer.toString(burpeecount));
-            }
-            if (max == 3) {
-                squatcount++;
-                squatprob.setText(Integer.toString(squatcount));
-            }
+
+
             // Clear all the values
             xGrav.clear();
             yGrav.clear();
@@ -376,6 +441,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yRot.clear();
             zRot.clear();
             input_signal.clear();
+
         }
 
     }
