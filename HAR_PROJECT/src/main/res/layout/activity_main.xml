@@ -101,7 +101,7 @@
     <TableRow
         android:id="@+id/standing_row"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="153dp"
         android:padding="22dp">
 
         <TextView
@@ -117,6 +117,21 @@
             android:layout_weight="1"
             android:textAlignment="center"
             android:textSize="18sp" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/standing_row"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="22dp">
+
+        <Button
+            android:id="@+id/resetprob"
+            android:layout_width="123dp"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:text="Reset"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
     </TableRow>
 
 </TableLayout>
