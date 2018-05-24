@@ -261,6 +261,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Build an order input_signal : { 3x Gravity, 3x Accelerations, 3x Orientation, 3x Rotation}
         if ((event.sensor.getType() == Sensor.TYPE_GRAVITY) && (grav == true)) {
 
+
+
             // Convert values from m/s^2 to G-force
           /* xG = ((event.values[0] / gConst) * 0.5) + 0.5;
            yG = ((event.values[1] / gConst) * 0.5) + 0.5;
@@ -274,9 +276,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yG = calculateNewValue(event.values[1]/ gConst,maxGrav/gConst,(-1*maxGrav)/gConst,1,-1);
             zG = calculateNewValue(event.values[2]/ gConst,maxGrav/gConst,(-1*maxGrav)/gConst,1,-1);
 
-            xG = (xG*signal_Constant[0])+signal_Constant[12];
-            yG = (yG*signal_Constant[1])+signal_Constant[13];
-            zG = (zG*signal_Constant[2])+signal_Constant[14];
+            // System.out.println(-2*xG);
+            //System.out.println(-2*yG);
+            //System.out.println(-2*zG);
+            xG = (-2*xG*signal_Constant[0])+signal_Constant[12];
+            yG = (-2*yG*signal_Constant[1])+signal_Constant[13];
+            zG = (-2*zG*signal_Constant[2])+signal_Constant[14];
+
+
 
          // System.out.println("x :  "+ xG+"              y:  "+ yG+"                 +z:   "+ zG );
 
@@ -309,12 +316,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             xA = calculateNewValue(event.values[0]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
             yA = calculateNewValue(event.values[1]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
             zA = calculateNewValue(event.values[2]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
+            //System.out.println(-1*yA);
+           // System.out.println(-1*zA);
             //System.out.println(event.values[0]+ "    XA");
            // System.out.println(event.values[1]+ "    YA");
            // System.out.println(event.values[2]+ "    ZA");
-            xA = (xA*signal_Constant[3])+signal_Constant[15];
-            yA = (yA*signal_Constant[4])+signal_Constant[16];
-            zA = (zA*signal_Constant[5])+signal_Constant[17];
+            xA = (-1*xA*signal_Constant[3])+signal_Constant[15];
+            yA = (-1*yA*signal_Constant[4])+signal_Constant[16];
+            zA = (-1*zA*signal_Constant[5])+signal_Constant[17];
            // System.out.println("x :  "+ xA+"              y:  "+ yA+"                 +z:   "+ zA );
 
             float xA1 = (float) xA;
@@ -332,13 +341,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if ((event.sensor.getType() == Sensor.TYPE_ORIENTATION) && (orient == true)) {
             //Convert values to rad/s
 
-            p = calculateNewValue(event.values[1]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI/2,-M_PI/2);
-            r = calculateNewValue(event.values[2]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI,-M_PI);
-            y = calculateNewValue(event.values[0]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI,-M_PI);    // This is azimuth not yaw, fix it!
+            p = calculateNewValue(event.values[1]*pi_Rad,180*pi_Rad,-180*pi_Rad,M_PI/2,-M_PI/2);
+            r = calculateNewValue(event.values[2]*pi_Rad,90*pi_Rad,-90*pi_Rad,M_PI,-M_PI);
+            y = calculateNewValue(event.values[0]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI,-M_PI);
+            //System.out.println(p);
+
 
             p = (p*signal_Constant[6])+signal_Constant[18];
             r = (r*signal_Constant[7])+signal_Constant[19];
-            y = (y*signal_Constant[8])+signal_Constant[20];
+            y = (-1*y*signal_Constant[8])+signal_Constant[20];
+
 
            // System.out.println("pitch :  "+ p+"              roll:  "+ r+"                 +yaw:   "+ y );
 /*
@@ -369,9 +381,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yR = calculateNewValue(event.values[1],maxGyro,0,pi_Rad*360,0);
             zR = calculateNewValue(event.values[2],maxGyro,0,pi_Rad*360,0);
 
-            xR = (xR*signal_Constant[9])+signal_Constant[21];
-            yR = (yR*signal_Constant[10])+signal_Constant[22];
-            zR = (zR*signal_Constant[11])+signal_Constant[23];
+
+            xR = (2*xR*signal_Constant[9])+signal_Constant[21];
+            yR = (2*yR*signal_Constant[10])+signal_Constant[22];
+            zR = (2*zR*signal_Constant[11])+signal_Constant[23];
            // System.out.println("x :  "+ xR+"              y:  "+ yR+"                 +z:   "+ zR );
            /* xR = ((event.values[0]) * 0.04504505) +  0.54414414;
             yR = ((event.values[1]) * 0.03229974) + 0.55620155;
@@ -397,10 +410,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // We take 40 timesteps * 12 input = 600 elements
         if (input_signal.size() == 600) {
 
-          /*    for(int k=0;k<input_signal.size();k++){
-
-                System.out.println(input_signal.toString());
-               }
+              /*
             // Perform inference using Tensorflow
             System.out.println("STR");
 
@@ -431,12 +441,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // Tensorflow Inference
             float[] results = activityInference.getActivityProb(toFloatArray(input_signal));
             // Return the predict results
-               /* System.out.println("result");
+                System.out.println("result");
                 System.out.println(results[0] + "           Break");
                 System.out.println(results[1] + "           Burpee");
                 System.out.println(results[2] + "           Situp");
                 System.out.println(results[3] + "           Squat");
-                System.out.println(results[4] + "           Set_Break"); */
+                System.out.println(results[4] + "           Set_Break");
             input_signal.clear();
 
 
@@ -444,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
             int max = 0;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 4; i++) {
                 if (results[i] > results[max]) {
                     max = i;
                 }
