@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.File;
 import java.io.*;
+import android.util.Log;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -55,6 +56,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private boolean orient;
     private boolean rot;
     private Button resetprob;
+    private float maxValue = 0;
+    private static double accConst = 19.6133;
+    private static double gravConst = 9.8;
+    private static double orientConst;
+    private static double M_PI = 3.14159265358979323846264338327950288;
+    private static double pi_Rad = 3.14159265359/180;
+    private static double[] signal_Constant = {0.5, 0.5, 0.5, 0.07007708, 0.07621951, 0.06131208, 0.31948882,  0.15923567, 0.15923567, 0.04504505, 0.03229974, 0.05347594,0.5, 0.5, 0.5, 0.49544499, 0.5007622, 0.527897, 0.49840256, 0.5, 0.5, 0.54414414, 0.55620155, 0.53475936};
+    private static double maxAcc = 19.6133;
+    private static double maxGrav = 19.6133;
+    private static double maxGyro = 34.90656;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Create Sensor Manager
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         // AccelerometerSensor
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         // Orientation Sensor
         mOrientationAngles = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         // Gravity Sensor
@@ -86,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
 
         input_signal = new ArrayList();
+
+        //double [] input_signal  = {-0.0015263177920132875, -0.010142285376787186, -0.99994742870330811, 3.0956522095948458e-05, 0.0010785652557387948, -0.008826402947306633, 0.010142459674417134, -0.0015263969271222767, 0.39395883702886042, -0.0014953624922782183, 0.0023854372557252645, -0.003862177487462759};
+
         // input_signal.clear();
         //input_signal = csvReader();
 
@@ -136,7 +150,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 burpeeprob.setText("");
             }
         });
+
         activityInference = new ActivityInference(getApplicationContext());
+        System.out.println(mAccelerometer.getMaximumRange()+ "  Accelerometer" +
+                "");
+        System.out.println(mGravity.getMaximumRange()+ "  Gravity");
+        System.out.println(mOrientationAngles.getMaximumRange()+ "  Orientation");
+        System.out.println(mGyroscope.getMaximumRange()+ "  Gyroscope");
 
 
     }
@@ -224,35 +244,79 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this, mGyroscope,100000,100000);
 
     }
+    private double calculateNewValue(double currentValue,double oldValueMax,double oldValueMin,double newValueMax,double newValueMin){
+
+        double oldRange = oldValueMax - oldValueMin;
+        double newRange = newValueMax - newValueMin;
+        double newValue = (((currentValue - oldValueMin)*newRange)/oldRange)+newValueMin;
+        return newValue;
+    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
 
             // Let Activity Prediction
             activityPrediction();
             // Build an order input_signal : { 3x Gravity, 3x Accelerations, 3x Orientation, 3x Rotation}
         if ((event.sensor.getType() == Sensor.TYPE_GRAVITY) && (grav == true)) {
+
             // Convert values from m/s^2 to G-force
-            xG = ((event.values[0] / gConst) * 0.5) + ((event.values[0] / gConst) * 0.5);
-            yG = ((event.values[1] / gConst) * 0.5) + ((event.values[1] / gConst) * 0.5);
-            zG = ((event.values[2] / gConst) * 0.5) + ((event.values[2] / gConst) * 0.5);
+          /* xG = ((event.values[0] / gConst) * 0.5) + 0.5;
+           yG = ((event.values[1] / gConst) * 0.5) + 0.5;
+           zG = ((event.values[2] / gConst) * 0.5) + 0.5; */
+
+          /*Calculate the values in the new range. Convert the values and the old ranges from m/s^2 to G-force
+            Max value from mGravity = 34.90656
+            Max value readed from gravity sensor = 9.8 */
+
+            xG = calculateNewValue(event.values[0]/ gConst,maxGrav/gConst,(-1*maxGrav)/gConst,1,-1);
+            yG = calculateNewValue(event.values[1]/ gConst,maxGrav/gConst,(-1*maxGrav)/gConst,1,-1);
+            zG = calculateNewValue(event.values[2]/ gConst,maxGrav/gConst,(-1*maxGrav)/gConst,1,-1);
+
+            xG = (xG*signal_Constant[0])+signal_Constant[12];
+            yG = (yG*signal_Constant[1])+signal_Constant[13];
+            zG = (zG*signal_Constant[2])+signal_Constant[14];
+
+         // System.out.println("x :  "+ xG+"              y:  "+ yG+"                 +z:   "+ zG );
+
+
+
             float xG1 = (float) xG;
             float yG1 = (float) yG;
             float zG1 = (float) zG;
 
-            input_signal.add(xG1);
-            input_signal.add(yG1);
-            input_signal.add(zG1);
+             input_signal.add(xG1);
+             input_signal.add(yG1);
+             input_signal.add(zG1);
+
+
+
+
             acc = true;
             grav = false;
             mGrav = event.values;
 
         }
-        if ((event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) && (acc == true)) {
+        if ((event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) && (acc == true)) {
+            //Return the acceleration of the device minus G-force ( user acceleration for ios)
             // Convert values from m/s^2 to G-force
-            xA = ((event.values[0] / gConst) * 0.07007708) + ((event.values[0] / gConst) * 0.49544499);
-            yA = ((event.values[1] / gConst) * 0.07621951) + ((event.values[1] / gConst) * 0.5007622);
-            zA = ((event.values[2] / gConst) * 0.06131208) + ((event.values[2] / gConst) * 0.527897);
+         /*
+            xA = ((event.values[0] / gConst) * 0.07007708) 0.07007708
+            yA = ((event.values[1] / gConst) * 0.07621951) +  0.5007622;
+            zA = ((event.values[2] / gConst) * 0.06131208) +  0.527897;
+*/
+            xA = calculateNewValue(event.values[0]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
+            yA = calculateNewValue(event.values[1]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
+            zA = calculateNewValue(event.values[2]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
+            //System.out.println(event.values[0]+ "    XA");
+           // System.out.println(event.values[1]+ "    YA");
+           // System.out.println(event.values[2]+ "    ZA");
+            xA = (xA*signal_Constant[3])+signal_Constant[15];
+            yA = (yA*signal_Constant[4])+signal_Constant[16];
+            zA = (zA*signal_Constant[5])+signal_Constant[17];
+           // System.out.println("x :  "+ xA+"              y:  "+ yA+"                 +z:   "+ zA );
+
             float xA1 = (float) xA;
             float yA1 = (float) yA;
             float zA1 = (float) zA;
@@ -263,14 +327,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             orient = true;
             acc = false;
 
+
         }
         if ((event.sensor.getType() == Sensor.TYPE_ORIENTATION) && (orient == true)) {
             //Convert values to rad/s
 
-            p = ((event.values[1] * 0.0174533) * 0.31948882) + ((event.values[1] * 0.0174533) * 0.49840256);
-            r = ((event.values[2] * 0.0174533) * 0.15923567) + ((event.values[2] * 0.0174533) * 0.5);
-            y = ((event.values[0] * 0.0174533) * 0.15923567) + ((event.values[0] * 0.0174533) * 0.5);
+            p = calculateNewValue(event.values[1]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI/2,-M_PI/2);
+            r = calculateNewValue(event.values[2]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI,-M_PI);
+            y = calculateNewValue(event.values[0]*pi_Rad,360*pi_Rad,0*pi_Rad,M_PI,-M_PI);    // This is azimuth not yaw, fix it!
 
+            p = (p*signal_Constant[6])+signal_Constant[18];
+            r = (r*signal_Constant[7])+signal_Constant[19];
+            y = (y*signal_Constant[8])+signal_Constant[20];
+
+           // System.out.println("pitch :  "+ p+"              roll:  "+ r+"                 +yaw:   "+ y );
+/*
+            p = ((event.values[1] * 0.0174533) * 0.31948882) + 0.49840256;
+            r = ((event.values[2] * 0.0174533) * 0.15923567) + 0.5;
+            y = ((event.values[0] * 0.0174533) * 0.15923567) + 0.5;
+
+*/
 
             float p1 = (float) p;
             float r1 = (float) r;
@@ -289,11 +365,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if ((event.sensor.getType() == Sensor.TYPE_GYROSCOPE) && (rot == true)) {
             // Rad/s
+            xR = calculateNewValue(event.values[0],maxGyro,0,pi_Rad*360,0);
+            yR = calculateNewValue(event.values[1],maxGyro,0,pi_Rad*360,0);
+            zR = calculateNewValue(event.values[2],maxGyro,0,pi_Rad*360,0);
 
-            xR = ((event.values[0]) * 0.04504505) + ((event.values[0] / gConst) * 0.54414414);
-            yR = ((event.values[1]) * 0.03229974) + ((event.values[1] / gConst) * 0.55620155);
-            zR = ((event.values[2]) * 0.05347594) + ((event.values[2] / gConst) * 0.53475936);
-
+            xR = (xR*signal_Constant[9])+signal_Constant[21];
+            yR = (yR*signal_Constant[10])+signal_Constant[22];
+            zR = (zR*signal_Constant[11])+signal_Constant[23];
+           // System.out.println("x :  "+ xR+"              y:  "+ yR+"                 +z:   "+ zR );
+           /* xR = ((event.values[0]) * 0.04504505) +  0.54414414;
+            yR = ((event.values[1]) * 0.03229974) + 0.55620155;
+            zR = ((event.values[2]) * 0.05347594) + 0.53475936;
+*/
 
             float xR1 = (float) xR;
             float yR1 = (float) yR;
@@ -314,12 +397,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // We take 40 timesteps * 12 input = 600 elements
         if (input_signal.size() == 600) {
 
-            //  for(int k=0;k<input_signal.size();k++){
+          /*    for(int k=0;k<input_signal.size();k++){
 
-            //    System.out.println(input_signal.toString());
-            //   }
+                System.out.println(input_signal.toString());
+               }
             // Perform inference using Tensorflow
-           /* System.out.println("STR");
+            System.out.println("STR");
 
 
             int startSignal = 0;
@@ -341,83 +424,81 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 endSignal = endSignal + 600;
 */
 
-               // System.out.println(prova.size());
-                //float[] results = activityInference.getActivityProb(toFloatArray(prova));
+            // System.out.println(prova.size());
+            //float[] results = activityInference.getActivityProb(toFloatArray(prova));
 
 
-
-
-                // Tensorflow Inference
-                float[] results = activityInference.getActivityProb(toFloatArray(input_signal));
-                // Return the predict results
-                System.out.println("result");
+            // Tensorflow Inference
+            float[] results = activityInference.getActivityProb(toFloatArray(input_signal));
+            // Return the predict results
+               /* System.out.println("result");
                 System.out.println(results[0] + "           Break");
                 System.out.println(results[1] + "           Burpee");
                 System.out.println(results[2] + "           Situp");
                 System.out.println(results[3] + "           Squat");
-                System.out.println(results[4] + "           Set_Break");
-                input_signal.clear();
+                System.out.println(results[4] + "           Set_Break"); */
+            input_signal.clear();
 
 
+            // Take the max result
 
-               // Take the max result
 
-
-                int max = 0;
-                for (int i = 0; i < 5; i++) {
-                    if (results[i] > results[max]) {
-                        max = i;
-                    }
-
+            int max = 0;
+            for (int i = 0; i < 5; i++) {
+                if (results[i] > results[max]) {
+                    max = i;
                 }
-                if (max == 4) {
-                    input_collection.add("Break");
-                    breakcount++;
-                    breakprob.setText(Integer.toString(breakcount));
-                }
-                    if (max == 0) {
-                        input_collection.add("Break");
-                        breakcount++;
-                        breakprob.setText(Integer.toString(breakcount));
-                    }
-                    if (max == 2) {
-                        input_collection.add("Situp");
-                        situpcount++;
-                        situpprob.setText(Integer.toString(situpcount));
-                    }
-                    if (max == 1) {
-                        input_collection.add("Burpee");
-                        burpeecount++;
-                        burpeeprob.setText(Integer.toString(burpeecount));
-                    }
-                    if (max == 3) {
-                        input_collection.add("Squat");
-                        squatcount++;
-                        squatprob.setText(Integer.toString(squatcount));
-                    }
-
-                }
-               // for (int k = 0; k < input_collection.size(); k++) {
-                 //   System.out.println(input_collection.get(k) + " è la previsione numero : " + (k + 1));
-             //  }
-
-
-                // Clear all the values
-                xGrav.clear();
-                yGrav.clear();
-                zGrav.clear();
-                xAcc.clear();
-                yAcc.clear();
-                zAcc.clear();
-                pitch.clear();
-                roll.clear();
-                yaw.clear();
-                xRot.clear();
-                yRot.clear();
-                zRot.clear();
-                //input_signal.clear();
 
             }
+            if (max == 4) {
+                input_collection.add("Break");
+                breakcount++;
+                breakprob.setText(Integer.toString(breakcount));
+            }
+            if (max == 0) {
+                input_collection.add("Break");
+                breakcount++;
+                breakprob.setText(Integer.toString(breakcount));
+            }
+            if (max == 2) {
+                input_collection.add("Situp");
+                situpcount++;
+                situpprob.setText(Integer.toString(situpcount));
+            }
+            if (max == 1) {
+                input_collection.add("Burpee");
+                burpeecount++;
+                burpeeprob.setText(Integer.toString(burpeecount));
+            }
+            if (max == 3) {
+                input_collection.add("Squat");
+                squatcount++;
+                squatprob.setText(Integer.toString(squatcount));
+            }
+
+
+            // for (int k = 0; k < input_collection.size(); k++) {
+            //   System.out.println(input_collection.get(k) + " è la previsione numero : " + (k + 1));
+            //  }
+
+
+            // Clear all the values
+            xGrav.clear();
+            yGrav.clear();
+            zGrav.clear();
+            xAcc.clear();
+            yAcc.clear();
+            zAcc.clear();
+            pitch.clear();
+            roll.clear();
+            yaw.clear();
+            xRot.clear();
+            yRot.clear();
+            zRot.clear();
+            input_signal.clear();
+
+        }
+    }
 
 
 
@@ -448,6 +529,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onAccuracyChanged (Sensor sensor,int i){
+
+
 
         }
     }

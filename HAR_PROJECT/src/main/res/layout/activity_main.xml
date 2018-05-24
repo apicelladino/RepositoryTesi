@@ -10,8 +10,8 @@
 
     <TableRow
         android:id="@+id/title_row"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="342dp"
+        android:layout_height="56dp"
         android:padding="22dp"
         android:textAlignment="center">
 
@@ -122,7 +122,7 @@
     <TableRow
         android:id="@+id/standing_row"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="21dp"
         android:padding="22dp">
 
         <Button
