@@ -1,17 +1,22 @@
 package io.github.aqibsaeed.activityrecognition;
 
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
-
+import android.content.Intent;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
+import org.w3c.dom.Text;
+
 import java.math.BigDecimal;
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -24,10 +29,12 @@ import java.io.FileReader;
 import java.io.File;
 import java.io.*;
 import android.util.Log;
+import android.media.MediaPlayer;
+
+
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    // gConstant 9.81
     private final double gConst = 9.81;
     private final int N_SAMPLES = 50;
     private TextView breakprob;
@@ -66,11 +73,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static double maxAcc = 19.6133;
     private static double maxGrav = 19.6133;
     private static double maxGyro = 34.90656;
+    private String currentExercise = "";
+    private String currentCount="";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        Intent intent = getIntent();
+        String message = intent.getStringExtra(PredictActivity.START_MESSAGE);
+
+
         resetprob = (Button) findViewById(R.id.resetprob);
         breakprob = (TextView) findViewById(R.id.breakprob);
         situpprob = (TextView) findViewById(R.id.situpprob);
@@ -87,18 +104,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mGravity = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
         //Gyroscope Sensor
         mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        mGeomagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
         // Register sensor Listener with 0.1s delay
 
-        mSensorManager.registerListener(this, mGeomagnetic, 100000,100000);
+
         mSensorManager.registerListener(this, mAccelerometer, 100000,100000);
         mSensorManager.registerListener(this, mOrientationAngles, 100000,100000);
         mSensorManager.registerListener(this, mGravity,100000,100000);
-        mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mGyroscope,100000,100000);
 
         input_signal = new ArrayList();
 
-        //double [] input_signal  = {-0.0015263177920132875, -0.010142285376787186, -0.99994742870330811, 3.0956522095948458e-05, 0.0010785652557387948, -0.008826402947306633, 0.010142459674417134, -0.0015263969271222767, 0.39395883702886042, -0.0014953624922782183, 0.0023854372557252645, -0.003862177487462759};
+
 
         // input_signal.clear();
         //input_signal = csvReader();
@@ -160,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     }
+
    //
    /* private void writeText() {
         BufferedWriter writer = null;
@@ -237,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // mSensorManager.registerListener(this, mOrientationAngles, 100000, 100000);
         // mSensorManager.registerListener(this, mGravity, 100000, 100000);
         // mSensorManager.registerListener(this, mGyroscope, 100000, 100000);
-        mSensorManager.registerListener(this, mGeomagnetic, SensorManager.SENSOR_DELAY_NORMAL);
+
         mSensorManager.registerListener(this, mAccelerometer, 100000,100000);
         mSensorManager.registerListener(this, mOrientationAngles, 100000,100000);
         mSensorManager.registerListener(this, mGravity, 100000,100000);
@@ -308,19 +326,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if ((event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) && (acc == true)) {
             //Return the acceleration of the device minus G-force ( user acceleration for ios)
             // Convert values from m/s^2 to G-force
-         /*
-            xA = ((event.values[0] / gConst) * 0.07007708) 0.07007708
-            yA = ((event.values[1] / gConst) * 0.07621951) +  0.5007622;
-            zA = ((event.values[2] / gConst) * 0.06131208) +  0.527897;
-*/
+
             xA = calculateNewValue(event.values[0]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
             yA = calculateNewValue(event.values[1]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
             zA = calculateNewValue(event.values[2]/gConst, maxAcc/gConst, (-1*maxAcc)/gConst,1,-1);
             //System.out.println(-1*yA);
            // System.out.println(-1*zA);
-            //System.out.println(event.values[0]+ "    XA");
-           // System.out.println(event.values[1]+ "    YA");
-           // System.out.println(event.values[2]+ "    ZA");
+
             xA = (-1*xA*signal_Constant[3])+signal_Constant[15];
             yA = (-1*yA*signal_Constant[4])+signal_Constant[16];
             zA = (-1*zA*signal_Constant[5])+signal_Constant[17];
@@ -353,12 +365,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
            // System.out.println("pitch :  "+ p+"              roll:  "+ r+"                 +yaw:   "+ y );
-/*
-            p = ((event.values[1] * 0.0174533) * 0.31948882) + 0.49840256;
-            r = ((event.values[2] * 0.0174533) * 0.15923567) + 0.5;
-            y = ((event.values[0] * 0.0174533) * 0.15923567) + 0.5;
-
-*/
 
             float p1 = (float) p;
             float r1 = (float) r;
@@ -386,10 +392,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             yR = (2*yR*signal_Constant[10])+signal_Constant[22];
             zR = (2*zR*signal_Constant[11])+signal_Constant[23];
            // System.out.println("x :  "+ xR+"              y:  "+ yR+"                 +z:   "+ zR );
-           /* xR = ((event.values[0]) * 0.04504505) +  0.54414414;
-            yR = ((event.values[1]) * 0.03229974) + 0.55620155;
-            zR = ((event.values[2]) * 0.05347594) + 0.53475936;
-*/
+
 
             float xR1 = (float) xR;
             float yR1 = (float) yR;
@@ -401,38 +404,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             grav = true;
             rot = false;
         }
-
-        }
-
+    }
 
 
     private void activityPrediction() {
         // We take 40 timesteps * 12 input = 600 elements
         if (input_signal.size() == 600) {
-
-              /*
-            // Perform inference using Tensorflow
-            System.out.println("STR");
-
-
-            int startSignal = 0;
-            int endSignal = 600;
-            int iterationNumber = 1;
-            System.out.println(startSignal);
-
-            while (endSignal < 1296000) {
-                int startProva = 0;
-                List<Float> prova = new ArrayList<>();
-                for (int j = 0; j < 600; j++) {
-                 //   prova.add(startProva, Float.parseFloat(input_signal.get(j + startSignal)));
-
-                    //System.out.println(prova.toString());
-
-                    startProva++;
-                }
-                startSignal = endSignal;
-                endSignal = endSignal + 600;
-*/
 
             // System.out.println(prova.size());
             //float[] results = activityInference.getActivityProb(toFloatArray(prova));
@@ -447,51 +424,62 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 System.out.println(results[2] + "           Situp");
                 System.out.println(results[3] + "           Squat");
                 System.out.println(results[4] + "           Set_Break");
-            input_signal.clear();
 
+            input_signal.clear();
 
             // Take the max result
 
+                int max = 0;
+                for (int i = 0; i < 4; i++) {
+                    if (results[i] > results[max]) {
+                        max = i;
+                    }
 
-            int max = 0;
-            for (int i = 0; i < 4; i++) {
-                if (results[i] > results[max]) {
-                    max = i;
                 }
+                if (max == 4) {
+                    input_collection.add("Break");
+                    breakcount++;
+                    breakprob.setText(Integer.toString(breakcount));
+                }
+                if (max == 0) {
+                    input_collection.add("Break");
+                    breakcount++;
+                    // breakprob.setText(Integer.toString(breakcount));
+                }
+                if (max == 2) {
+                    input_collection.add("Situp");
+                    situpcount++;
+                    situpprob.setText(Integer.toString(situpcount));
+                    burpeeprob.setText("");
+                    burpeecount = 0;
+                    squatprob.setText("");
+                    squatcount = 0;
+                }
+                if (max == 1) {
+                    input_collection.add("Burpee");
+                    burpeecount++;
+                    burpeeprob.setText(Integer.toString(burpeecount));
+                    situpcount = 0;
+                    situpprob.setText("");
+                    squatcount = 0;
+                    squatprob.setText("");
 
-            }
-            if (max == 4) {
-                input_collection.add("Break");
-                breakcount++;
-                breakprob.setText(Integer.toString(breakcount));
-            }
-            if (max == 0) {
-                input_collection.add("Break");
-                breakcount++;
-                breakprob.setText(Integer.toString(breakcount));
-            }
-            if (max == 2) {
-                input_collection.add("Situp");
-                situpcount++;
-                situpprob.setText(Integer.toString(situpcount));
-            }
-            if (max == 1) {
-                input_collection.add("Burpee");
-                burpeecount++;
-                burpeeprob.setText(Integer.toString(burpeecount));
-            }
-            if (max == 3) {
-                input_collection.add("Squat");
-                squatcount++;
-                squatprob.setText(Integer.toString(squatcount));
-            }
 
+                }
+                if (max == 3) {
+                    input_collection.add("Squat");
+                    squatcount++;
+                    squatprob.setText(Integer.toString(squatcount));
+                    burpeecount = 0;
+                    burpeeprob.setText("");
+                    situpcount = 0;
+                    situpprob.setText("");
+                }
+            }
 
             // for (int k = 0; k < input_collection.size(); k++) {
             //   System.out.println(input_collection.get(k) + " è la previsione numero : " + (k + 1));
             //  }
-
-
             // Clear all the values
             xGrav.clear();
             yGrav.clear();
@@ -505,42 +493,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             xRot.clear();
             yRot.clear();
             zRot.clear();
-            input_signal.clear();
-
-        }
     }
-
-
-
-
-
-
-
-
-    /*private void normalize()
-    {
-        float x_m = 0.662868f; float y_m = 7.255639f; float z_m = 0.411062f;
-        float x_s = 6.849058f; float y_s = 6.746204f; float z_s = 4.754109f;
-
-        for(int i = 0; i < N_SAMPLES; i++)
-        {
-            x.set(i,((x.get(i) - x_m)/x_s));
-            y.set(i,((y.get(i) - y_m)/y_s));
-            z.set(i,((z.get(i) - z_m)/z_s));
-        }
-    }
-*/
         public static float round ( float d, int decimalPlace){
             BigDecimal bd = new BigDecimal(Float.toString(d));
             bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
             return bd.floatValue();
         }
 
-
         @Override
         public void onAccuracyChanged (Sensor sensor,int i){
-
-
 
         }
     }

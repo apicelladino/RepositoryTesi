@@ -10,8 +10,8 @@
 
     <TableRow
         android:id="@+id/title_row"
-        android:layout_width="342dp"
-        android:layout_height="56dp"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
         android:padding="22dp"
         android:textAlignment="center">
 
@@ -132,6 +132,7 @@
             android:baselineAligned="false"
             android:text="Reset"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
     </TableRow>
 
 </TableLayout>
