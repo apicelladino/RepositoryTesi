@@ -35,6 +35,7 @@ import android.media.MediaPlayer;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
     private final double gConst = 9.81;
     private final int N_SAMPLES = 50;
     private TextView breakprob;
@@ -75,14 +76,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static double maxGyro = 34.90656;
     private String currentExercise = "";
     private String currentCount="";
-
+    MediaPlayer mp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mp = MediaPlayer.create(this,R.raw.burpee_sound);
 
         Intent intent = getIntent();
         String message = intent.getStringExtra(PredictActivity.START_MESSAGE);
@@ -463,6 +464,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     situpprob.setText("");
                     squatcount = 0;
                     squatprob.setText("");
+                    mp.start();   //Reproduce burpee_sound.wav
 
 
                 }

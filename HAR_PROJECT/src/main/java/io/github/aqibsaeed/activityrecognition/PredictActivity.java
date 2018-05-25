@@ -18,7 +18,8 @@ public static String START_MESSAGE = "Start_Activity";
     }
     public void sendMessage(View view){
         Intent intent = new Intent(this, MainActivity.class);
-
+        FirebaseConnection connection = new FirebaseConnection();
+        connection.writeDatabase();
 
         intent.putExtra(START_MESSAGE, "Start");
         startActivity(intent);

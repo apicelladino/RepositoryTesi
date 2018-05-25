@@ -15,17 +15,21 @@
         android:roundIcon="@mipmap/ic_situp"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PredictActivity">
+        <activity android:name=".WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"
-            android:parentActivityName=".PredictActivity">
-
-        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:parentActivityName=".PredictActivity" />
+        <activity
+            android:name=".PredictActivity"
+            android:parentActivityName=".WelcomeActivity" />
+        <activity android:name=".LoginActivity"
+            android:parentActivityName=".WelcomeActivity"></activity>
     </application>
 
 </manifest>
