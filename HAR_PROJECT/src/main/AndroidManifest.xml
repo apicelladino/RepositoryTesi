@@ -28,8 +28,11 @@
         <activity
             android:name=".PredictActivity"
             android:parentActivityName=".WelcomeActivity" />
-        <activity android:name=".LoginActivity"
-            android:parentActivityName=".WelcomeActivity"></activity>
+        <activity
+            android:name=".LoginActivity"
+            android:parentActivityName=".WelcomeActivity" />
+        <activity android:name=".ScoreboardActivity"
+            android:parentActivityName=".PredictActivity"></activity>
     </application>
 
 </manifest>

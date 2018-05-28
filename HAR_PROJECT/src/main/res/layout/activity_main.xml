@@ -133,6 +133,13 @@
             android:text="Reset"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
+        <Button
+            android:id="@+id/buttonStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="sendStop"
+            android:text="STOP" />
+
     </TableRow>
 
 </TableLayout>

@@ -2,12 +2,14 @@ package io.github.aqibsaeed.activityrecognition;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.io.InputStream;
 import java.io.IOException;
@@ -31,11 +34,15 @@ import java.io.*;
 import android.util.Log;
 import android.media.MediaPlayer;
 
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-
+    public static String STOP_MESSAGE = "Stop Activity";
     private final double gConst = 9.81;
     private final int N_SAMPLES = 50;
     private TextView breakprob;
@@ -55,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static List xGrav, yGrav, zGrav, xAcc, yAcc, zAcc, pitch, roll, yaw, xRot, yRot, zRot;
     private static List input_signal;
     private static List<String> input_collection;
-    private int breakcount, situpcount, burpeecount, squatcount;
+    public int breakcount, situpcount, burpeecount, squatcount;
     private float[] mGrav;
     private float[] mGeo;
     private double p, r, y, xG, yG, zG, xA, yA, zA, xR, yR, zR;
@@ -77,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String currentExercise = "";
     private String currentCount="";
     MediaPlayer mp;
+    public int situpMap,squatMap,burpeeMap;
+
 
 
     @Override
@@ -451,19 +460,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     input_collection.add("Situp");
                     situpcount++;
                     situpprob.setText(Integer.toString(situpcount));
-                    burpeeprob.setText("");
-                    burpeecount = 0;
-                    squatprob.setText("");
-                    squatcount = 0;
+                  //  burpeeprob.setText("");
+                 //   burpeecount = 0;
+                 //   squatprob.setText("");
+                 //   squatcount = 0;
                 }
                 if (max == 1) {
                     input_collection.add("Burpee");
                     burpeecount++;
                     burpeeprob.setText(Integer.toString(burpeecount));
-                    situpcount = 0;
-                    situpprob.setText("");
-                    squatcount = 0;
-                    squatprob.setText("");
+                 //   situpcount = 0;
+                 //   situpprob.setText("");
+                 //   squatcount = 0;
+                 //   squatprob.setText("");
                     mp.start();   //Reproduce burpee_sound.wav
 
 
@@ -472,10 +481,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     input_collection.add("Squat");
                     squatcount++;
                     squatprob.setText(Integer.toString(squatcount));
-                    burpeecount = 0;
-                    burpeeprob.setText("");
-                    situpcount = 0;
-                    situpprob.setText("");
+                  //  burpeecount = 0;
+                  //  burpeeprob.setText("");
+                   // situpcount = 0;
+                  //  situpprob.setText("");
                 }
             }
 
@@ -504,6 +513,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         @Override
         public void onAccuracyChanged (Sensor sensor,int i){
+
+        }
+        public void sendStop(View view){
+
+        final DatabaseReference mDatabase;
+        Intent intent = new Intent(this,PredictActivity.class);
+            SharedPreferences sp=getSharedPreferences("Login",0);
+            final String user = sp.getString("User","");
+            String pass = sp.getString("Pass","");
+              mDatabase = FirebaseDatabase.getInstance().getReference(user);
+            mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    mDatabase.child("Burpee").setValue(burpeecount+Integer.parseInt(dataSnapshot.child("Burpee").getValue().toString()));
+                    mDatabase.child("Situp").setValue(situpcount+Integer.parseInt(dataSnapshot.child("Situp").getValue().toString()));
+                    mDatabase.child("Squat").setValue(squatcount+Integer.parseInt(dataSnapshot.child("Squat").getValue().toString()));
+
+
+
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
+                intent.putExtra(STOP_MESSAGE, "Stop");
+                startActivity(intent);
 
         }
     }

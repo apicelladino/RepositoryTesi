@@ -10,6 +10,7 @@ import org.w3c.dom.Text;
 
 public class PredictActivity extends AppCompatActivity {
 public static String START_MESSAGE = "Start_Activity";
+public static String SCORE_MESSAGE = "Scoreboard_Activity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,10 +19,15 @@ public static String START_MESSAGE = "Start_Activity";
     }
     public void sendMessage(View view){
         Intent intent = new Intent(this, MainActivity.class);
-        FirebaseConnection connection = new FirebaseConnection();
-        connection.writeDatabase();
+
+
 
         intent.putExtra(START_MESSAGE, "Start");
+        startActivity(intent);
+    }
+    public void sendScore(View view){
+        Intent intent = new Intent(this,ScoreboardActivity.class);
+        intent.putExtra(SCORE_MESSAGE,"Scoreboard");
         startActivity(intent);
     }
 }
